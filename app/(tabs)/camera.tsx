@@ -16,17 +16,17 @@ export default function TabThreeScreen() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const cameraRef = useRef<typeof Camera>(null);
-  const [recommendation, setRecommendation] = useState('');
+  let [recommendation, setRecommendation] = useState('');
   const [userFileInput, setUserFileInput] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [foodnamer, setFoodnamer] = useState<string>('temp');
   const API_URL = 'http://10.180.0.149:5000'; // Your Flask API URL
 
-  const SaveLLM = async () => {
+  const SaveLLM = async (recommendation: string) => {
     try {
       const fileUri = `${FileSystem.documentDirectory}personalOutput.txt`;
       await FileSystem.writeAsStringAsync(fileUri, recommendation, { encoding: FileSystem.EncodingType.UTF8 });
-      await AsyncStorage.setItem('personalOutput', recommendation);
+      await AsyncStorage.setItem('personalOutput', recommendation); // Update AsyncStorage directly with the argument
       if (!recommendation) {
         console.log('No recommendation to save!');
         return;
@@ -59,10 +59,15 @@ export default function TabThreeScreen() {
         return;
       }
 
+      const modifiedIntParams = intParams.map((param, index) => 
+        index === 2 ? param * 1000 : param
+      );
+      console.log(modifiedIntParams)
+
       const userFileInput = await handleRead(); // Get the file content directly
 
       const response = await axios.post(`${API_URL}/api/recommendation`, {
-        int_params: intParams,
+        int_params: modifiedIntParams,
         diseases: userFileInput || '',
         ingredients: ingredients,
       });
@@ -70,12 +75,13 @@ export default function TabThreeScreen() {
       // Check if the response data structure is correct
       if (response.data && response.data.recommendation) {
         const temp = response.data.recommendation;
-        await setRecommendation(temp);
+        setRecommendation(temp)
         console.log('Recommendation:', temp);
-        await SaveLLM();
+        await SaveLLM(temp);
       } else {
         console.error('Invalid response format from API');
         setRecommendation('Failed to get recommendation');
+        //await SaveLLM();
       }
     } catch (error) {
       console.error('Error fetching recommendation:', error);
@@ -170,10 +176,10 @@ export default function TabThreeScreen() {
             onPress: async (foodName) => {
               if (foodName) {
                 console.log('Food Name Entered:', foodName);
-                setFoodnamer(foodName);
+                await setFoodnamer(foodName);
                 await saveFoodWithName(foodName);
                 console.log('Food Name Saved:', foodName);
-                await SaveLLM();
+                //await SaveLLM();
               }
             },
           },
