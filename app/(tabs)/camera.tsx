@@ -70,7 +70,7 @@ export default function TabThreeScreen() {
       // Check if the response data structure is correct
       if (response.data && response.data.recommendation) {
         const temp = response.data.recommendation;
-        setRecommendation(temp);
+        await setRecommendation(temp);
         console.log('Recommendation:', temp);
         await SaveLLM();
       } else {
