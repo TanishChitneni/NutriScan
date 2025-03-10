@@ -20,7 +20,7 @@ export default function TabThreeScreen() {
   const [userFileInput, setUserFileInput] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [foodnamer, setFoodnamer] = useState<string>('temp');
-  const API_URL = 'http://10.180.0.149:5000'; // Your Flask API URL
+  const API_URL = '<your_api>'; // Your Flask API URL ex. http://10.180.0.149:5000
 
   const SaveLLM = async (recommendation: string) => {
     try {
